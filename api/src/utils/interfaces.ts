@@ -5,7 +5,7 @@ export interface ResponseError extends NodeJS.ErrnoException {
 export interface SuperheroShort {
   id: number;
   nickname: string;
-  mainImage: string;
+  images: string[];
 }
 
 export interface SuperheroFull extends SuperheroShort {
@@ -13,7 +13,6 @@ export interface SuperheroFull extends SuperheroShort {
   origin_description: string;
   superpowers: string;
   catch_phrase: string;
-  images: string[];
 }
 
 export interface RequestBody {

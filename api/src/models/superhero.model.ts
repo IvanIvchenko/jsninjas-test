@@ -9,7 +9,6 @@ class Superhero extends Model {
   public origin_description!: string;
   public superpowers!: string;
   public catch_phrase!: string;
-  public mainImage!: string;
   public images!: string[];
 
   public readonly createdAt!: Date;
@@ -36,9 +35,6 @@ Superhero.init(
       type: DataTypes.STRING,
     },
     catch_phrase: {
-      type: DataTypes.STRING,
-    },
-    mainImage: {
       type: DataTypes.STRING,
     },
     images: {

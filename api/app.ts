@@ -7,10 +7,9 @@ import express from 'express';
 
 import { sequelize } from './src/connector/index.js';
 import { routes } from './src/routes/index.js';
+import { IMAGES_FOLDER_PATH } from './src/vars/consts/directory.js';
 
 const app = express();
-
-app.use(express.json());
 
 // Cors setup
 app.use(
@@ -38,6 +37,7 @@ app.use((req, res, next) => {
   console.log(`New Request, Target: ${req.method} - ${req.baseUrl}`);
   next();
 });
+app.use('/public', express.static(IMAGES_FOLDER_PATH));
 app.use(routes);
 
 // 404 handler

@@ -4,6 +4,6 @@ import { superheroRouter } from './superhero.router.js';
 
 const router = Router();
 
-router.use('/', superheroRouter);
+router.use('/superhero', superheroRouter);
 
 export { router as routes };

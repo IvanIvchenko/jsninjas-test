@@ -16,14 +16,14 @@ const storageConfig = multer.diskStorage({
     file: Express.Multer.File,
     cb: DestinationCallback,
   ) => {
-    cb(null, './static/images');
+    return cb(null, './static/images');
   },
   filename: (
     req: Request<{}, {}, RequestBody>,
     file: Express.Multer.File,
     cb: FileNameCallback,
   ) => {
-    cb(null, formatImageName(req.body.nickname, file));
+    return cb(null, formatImageName(req.body.nickname, file));
   },
 });
 // defining imagesave filters for superhero creation
@@ -32,27 +32,26 @@ const fileFilterCreate = async (
   file: Express.Multer.File,
   cb: FileFilterCallback,
 ): Promise<void> => {
+  // setTimeout(() => console.log(file), 0);
+  const superheroExists = await superheroExistsCheck(req.body.nickname);
   if (
     !req.body.nickname ||
     !req.body.real_name ||
     !req.body.origin_description ||
     !req.body.superpowers ||
-    !req.body.catch_phrase ||
-    !file
+    !req.body.catch_phrase
   ) {
-    cb(null, false);
-  } else {
-    const superheroExists = await superheroExistsCheck(req.body.nickname);
-    if (
-      (!superheroExists && file.mimetype === 'image/png') ||
-      file.mimetype === 'image/jpg' ||
-      file.mimetype === 'image/jpeg'
-    ) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
+    return cb(null, false);
   }
+  if (
+    !superheroExists &&
+    (file.mimetype === 'image/png' ||
+      file.mimetype === 'image/jpg' ||
+      file.mimetype === 'image/jpeg')
+  ) {
+    return cb(null, true);
+  }
+  return cb(null, false);
 };
 // defining imagesave filters for superhero edit
 const fileFilterEdit = async (
@@ -65,17 +64,17 @@ const fileFilterEdit = async (
     file.mimetype === 'image/jpg' ||
     file.mimetype === 'image/jpeg'
   ) {
-    cb(null, true);
+    return cb(null, true);
   } else {
-    cb(null, false);
+    return cb(null, false);
   }
 };
 
-export const uploadNewPicture = multer({
+export const uploadNewPictures = multer({
   storage: storageConfig,
   fileFilter: fileFilterCreate,
 });
-export const uploadEditPicture = multer({
+export const uploadEditPictures = multer({
   storage: storageConfig,
   fileFilter: fileFilterEdit,
 });

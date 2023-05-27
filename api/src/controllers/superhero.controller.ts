@@ -45,7 +45,10 @@ export class SuperheroController {
       const foundSuperheroes = await this.superheroService.findAll(page);
       res
         .status(200)
-        .set({ 'X-total-count': rowNumber })
+        .set({
+          'Access-Control-Expose-Headers': '*',
+          'X-total-count': rowNumber,
+        })
         .json(foundSuperheroes);
     } catch (err) {
       if (err instanceof Error) {

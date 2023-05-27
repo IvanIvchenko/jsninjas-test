@@ -5,7 +5,6 @@ import { Request } from 'express';
 
 import { Superhero } from '../models/superhero.model.js';
 import { getImagesFilenames } from '../utils/getImages.util.js';
-import { getMainImageFilename } from '../utils/getMainImage.util.js';
 import { imageNamesToLinks } from '../utils/imageNamesToLinks.util.js';
 import {
   RequestBody,
@@ -18,7 +17,6 @@ import { IMAGES_FOLDER_PATH } from '../vars/consts/directory.js';
 
 export class SuperheroService {
   async create(data: Request<{}, {}, RequestBody>): Promise<SuperheroFull> {
-    const mainImage = getMainImageFilename(data.files['mainImage'][0]);
     const images = getImagesFilenames(data.files as Express.Multer.File[]);
 
     const newSuperhero = await Superhero.create({
@@ -27,16 +25,14 @@ export class SuperheroService {
       origin_description: data.body.origin_description,
       superpowers: data.body.superpowers,
       catch_phrase: data.body.catch_phrase,
-      mainImage: mainImage,
       images: images,
     });
 
     if (newSuperhero) {
-      newSuperhero.images = imageNamesToLinks(newSuperhero.images) as string[];
-      newSuperhero.mainImage = imageNamesToLinks(
-        newSuperhero.mainImage,
-      ) as string;
-      return newSuperhero.dataValues;
+      return {
+        ...newSuperhero.dataValues,
+        images: imageNamesToLinks(newSuperhero.images),
+      };
     } else {
       const err: ResponseError = new Error(
         'Error occured while creating a superhero',
@@ -55,15 +51,17 @@ export class SuperheroService {
     const superheroes: SuperheroShort[] = await Superhero.findAll({
       offset: (page - 1) * 5,
       limit: 5,
-      attributes: ['id', 'nickname', 'mainImage'],
+      attributes: ['id', 'nickname', 'images'],
       order: [['updatedAt', 'DESC']],
       raw: true,
     });
     if (superheroes) {
-      return superheroes.map((superhero) => ({
-        ...superhero,
-        mainImage: imageNamesToLinks(superhero.mainImage) as string,
-      }));
+      return superheroes.map((superhero) => {
+        return {
+          ...superhero,
+          images: imageNamesToLinks([superhero.images[0]]),
+        };
+      });
     } else {
       const err: ResponseError = new Error(
         'Error occured while retreaving superheroes',
@@ -79,12 +77,17 @@ export class SuperheroService {
       err.statusCode = 400;
       throw err;
     }
-    const superhero = await Superhero.findOne({ where: { id: id }, raw: true });
+    const superhero = await Superhero.findOne({
+      where: { id: id },
+      attributes: { exclude: ['createdAt, updatedAt'] },
+      raw: true,
+    });
 
     if (superhero) {
-      superhero.images = imageNamesToLinks(superhero.images) as string[];
-      superhero.mainImage = imageNamesToLinks(superhero.mainImage) as string;
-      return superhero.dataValues;
+      return {
+        ...superhero,
+        images: imageNamesToLinks(superhero.images),
+      };
     } else {
       const err: ResponseError = new Error(
         `No superhero with id=${id} was found`,
@@ -121,8 +124,6 @@ export class SuperheroService {
       superhero.images.map((image) => fs.unlink(IMAGES_FOLDER_PATH + image)),
     );
 
-    await fs.unlink(IMAGES_FOLDER_PATH + superhero.mainImage);
-
     return;
   }
 
@@ -137,11 +138,15 @@ export class SuperheroService {
       err.statusCode = 500;
       throw err;
     }
-
-    const mainImage = getMainImageFilename(data.files['mainImage'][0]);
     const images = getImagesFilenames(data.files as Express.Multer.File[]);
 
     const superhero = await Superhero.findOne({ where: { id: id } });
+
+    if (images) {
+      await Promise.all(
+        superhero.images.map((image) => fs.unlink(IMAGES_FOLDER_PATH + image)),
+      );
+    }
 
     const updatedSuperhero = await superhero.update({
       nickname: data.body.nickname || superhero.nickname,
@@ -150,18 +155,14 @@ export class SuperheroService {
         data.body.origin_description || superhero.origin_description,
       superpowers: data.body.superpowers || superhero.superpowers,
       catch_phrase: data.body.catch_phrase || superhero.catch_phrase,
-      mainImage: mainImage,
       images: images || superhero.images,
     });
 
     if (updatedSuperhero) {
-      updatedSuperhero.images = imageNamesToLinks(
-        updatedSuperhero.images,
-      ) as string[];
-      updatedSuperhero.mainImage = imageNamesToLinks(
-        updatedSuperhero.mainImage,
-      ) as string;
-      return updatedSuperhero.dataValues;
+      return {
+        ...updatedSuperhero,
+        images: imageNamesToLinks(updatedSuperhero.images),
+      };
     } else {
       const err: ResponseError = new Error(
         'Error occured while updating a superhero',

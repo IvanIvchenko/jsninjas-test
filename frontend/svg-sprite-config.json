@@ -1,0 +1,18 @@
+{
+  "shape": {
+    "id": {
+      "generator": "icon-%s"
+    }
+  },
+  "mode": {
+    "symbol": {
+      "dest": "src/assets",
+      "sprite": "icon-sprite.svg"
+    }
+  },
+  "svg": {
+    "rootAttributes": {
+      "id": "svg-icon-sprite"
+    }
+  }
+}

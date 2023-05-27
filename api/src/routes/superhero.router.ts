@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { SuperheroController } from '../controllers/superhero.controller.js';
 import { errorHandler } from '../middleware/errorHandler.js';
-import { uploadEditPicture, uploadNewPicture } from '../middleware/multer.js';
+import { uploadEditPictures, uploadNewPictures } from '../middleware/multer.js';
 import { superheroValidator } from '../middleware/superheroValidator.js';
 import { SuperheroService } from '../services/superhero.service.js';
 
@@ -13,7 +13,7 @@ const superheroRouter = Router();
 // Create a New superhero
 superheroRouter.post(
   '/',
-  uploadNewPicture.any(),
+  uploadNewPictures.array('image', 5),
   superheroValidator,
   superheroController.create.bind(superheroController),
   errorHandler,
@@ -36,7 +36,7 @@ superheroRouter.get(
 //Update a superhero w/ID
 superheroRouter.put(
   '/:id',
-  uploadEditPicture.any(),
+  uploadEditPictures.array('image', 5),
   superheroController.update.bind(superheroController),
   errorHandler,
 );
