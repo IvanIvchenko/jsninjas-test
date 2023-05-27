@@ -5,6 +5,6 @@ Setup checklist:
 3. Create a /src/frontend/.env file and copy contence of /src/frontend/.env.local
 
 Boot:
-1. Execute "npm run preinstall" & "npm run install" in root directory of project
-3. After the package installation process is complete, execute "npm start" in the terminal
-4. After package installation, execute "npm run start:dev" in root directory
+1. Execute "npm install" in root directory of project
+2. Execute "npm run packages" in root directory of project
+3. After the package installation process is complete, execute "npm run start" in the terminal
